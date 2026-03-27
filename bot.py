@@ -1,3 +1,4 @@
+
 import requests
 import json
 import os
@@ -6,11 +7,11 @@ from datetime import datetime, timezone
 
 TOKEN = "8313535097:AAGzDtX7FoWjVEDCLuX2uilhRfLSWNFLY2g"
 CHAT_ID = "-5183949382"
-API_KEY = "TU_API_KEY"
+API_KEY = "67acd669ed652da798ba482d69c33a95"
 
 ARCHIVO = "cuotas.json"
-print("VERSION NUEVA")
 ULTIMO_HEARTBEAT = None
+
 
 def enviar_mensaje(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
@@ -19,20 +20,28 @@ def enviar_mensaje(msg):
         "text": msg
     })
 
+
 def enviar_heartbeat():
     global ULTIMO_HEARTBEAT
 
     ahora = datetime.now(timezone.utc)
-    hora_actual = ahora.strftime("%Y-%m-%d %H")
 
-    if ULTIMO_HEARTBEAT != hora_actual:
+    if ULTIMO_HEARTBEAT is None:
         enviar_mensaje("🤖 Bot activo, esperando alertas...")
-        ULTIMO_HEARTBEAT = hora_actual
+        ULTIMO_HEARTBEAT = ahora
+        return
 
-# 🔁 LOOP REAL
+    diferencia = (ahora - ULTIMO_HEARTBEAT).total_seconds()
+
+    if diferencia >= 3600:
+        enviar_mensaje("🤖 Bot activo, esperando alertas...")
+        ULTIMO_HEARTBEAT = ahora
+
+
+# 🔁 LOOP INFINITO (CLAVE)
 while True:
     try:
-        print("bot iniciado")
+        print("ENTRANDO AL LOOP")
 
         url = f"https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey={API_KEY}&regions=eu&markets=h2h"
         res = requests.get(url)
@@ -44,6 +53,7 @@ while True:
         for partido in data:
             inicio = datetime.fromisoformat(partido["commence_time"].replace("Z", "+00:00"))
 
+            # ❌ ignorar en vivo
             if inicio < ahora:
                 continue
 
@@ -64,12 +74,14 @@ while True:
             promedio = round(sum(cuotas) / len(cuotas), 2)
             cuotas_actuales[equipos] = promedio
 
+        # historial
         if os.path.exists(ARCHIVO):
             with open(ARCHIVO, "r") as f:
                 cuotas_anteriores = json.load(f)
         else:
             cuotas_anteriores = {}
 
+        # 🔥 detección
         for partido, cuota in cuotas_actuales.items():
             if partido in cuotas_anteriores:
                 anterior = cuotas_anteriores[partido]
@@ -84,9 +96,11 @@ while True:
                         f"💰 Posible dinero fuerte"
                     )
 
+        # guardar
         with open(ARCHIVO, "w") as f:
             json.dump(cuotas_actuales, f)
 
+        # heartbeat
         enviar_heartbeat()
 
         print("bot terminado")
@@ -94,4 +108,4 @@ while True:
     except Exception as e:
         print("Error:", e)
 
-    time.sleep(300)
+    time.sleep(300)  # 5 minutos        
