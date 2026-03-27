@@ -108,4 +108,5 @@ while True:
     except Exception as e:
         print("Error:", e)
 
-    time.sleep(300)  # 5 minutos        
+    print("ESPERANDO 5 MINUTOS...")
+    time.sleep(300) 
