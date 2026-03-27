@@ -1,9 +1,13 @@
-from playwright.sync_api import sync_playwright
+
 import requests
+import json
+import os
 
 TOKEN = "8313535097:AAGzDtX7FoWjVEDCLuX2uilhRfLSWNFLY2g"
 CHAT_ID = "1572595670"
+API_KEY = "67acd669ed652da798ba482d69c33a95"
 
+ARCHIVO = "cuotas.json"
 
 def enviar_mensaje(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
@@ -12,22 +16,50 @@ def enviar_mensaje(msg):
         "text": msg
     })
 
-print("Abriendo navegador...")
+print("Buscando cambios de cuotas reales...")
 
-with sync_playwright() as p:
-    browser = p.chromium.launch(headless=True)
-    page = browser.new_page()
-    
-    page.goto("https://stake.com/sports")
-    page.wait_for_timeout(5000)  # espera que cargue JS
-    
-    contenido = page.content().lower()
-    
-    if "football" in contenido or "tennis" in contenido:
-        enviar_mensaje("✅ Detectó deportes (Playwright funciona)")
-        print("FUNCIONA")
+url = f"https://api.the-odds-api.com/v4/sports/soccer_epl/odds/?apiKey={API_KEY}&regions=eu&markets=h2h"
+
+try:
+    res = requests.get(url)
+    data = res.json()
+
+    cuotas_actuales = {}
+
+    for partido in data:
+        equipos = f"{partido['home_team']} vs {partido['away_team']}"
+
+        try:
+            cuota = partido['bookmakers'][0]['markets'][0]['outcomes'][0]['price']
+            cuotas_actuales[equipos] = cuota
+        except:
+            continue
+
+    # cargar historial
+    if os.path.exists(ARCHIVO):
+        with open(ARCHIVO, "r") as f:
+            cuotas_anteriores = json.load(f)
     else:
-        enviar_mensaje("❌ No detectó deportes (Playwright)")
-        print("NO DETECTÓ")
-    
-    browser.close()
+        cuotas_anteriores = {}
+
+    # comparar cuotas
+    for partido, cuota in cuotas_actuales.items():
+        if partido in cuotas_anteriores:
+            anterior = cuotas_anteriores[partido]
+
+            # detectar caída fuerte
+            if anterior - cuota >= 0.3:
+                enviar_mensaje(
+                    f"🔥 POSIBLE APUESTA GRANDE\n\n"
+                    f"{partido}\n"
+                    f"Cuota bajó de {anterior} → {cuota}"
+                )
+                print("ALERTA:", partido)
+
+    # guardar nuevas cuotas
+    with open(ARCHIVO, "w") as f:
+        json.dump(cuotas_actuales, f)
+
+except Exception as e:
+    enviar_mensaje("⚠️ Error en el bot")
+    print(e)
