@@ -77,17 +77,10 @@ for partido, cuota in cuotas_actuales.items():
             )
 def enviar_heartbeat():
     ahora = datetime.utcnow()
-    hora_actual = ahora.strftime("%Y-%m-%d %H")
 
-    ultima_hora = None
-    if os.path.exists(ARCHIVO_HEARTBEAT):
-        with open(ARCHIVO_HEARTBEAT, "r") as f:
-            ultima_hora = f.read()
-
-    if ultima_hora != hora_actual:
+    # manda solo una vez por hora (primeros 5 minutos)
+    if ahora.minute < 5:
         enviar_mensaje("🤖 Bot activo, esperando alertas...")
-        with open(ARCHIVO_HEARTBEAT, "w") as f:
-            f.write(hora_actual)
 # guardar
 with open(ARCHIVO, "w") as f:
     json.dump(cuotas_actuales, f)
