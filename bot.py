@@ -1,7 +1,7 @@
 import requests
 
-TOKEN = "TU_TOKEN"
-CHAT_ID = "TU_CHAT_ID"
+TOKEN = "8313535097:AAGzDtX7FoWjVEDCLuX2uilhRfLSWNFLY2g"
+CHAT_ID = "535031481"
 
 def enviar_mensaje(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
@@ -13,5 +13,5 @@ def enviar_mensaje(msg):
 url = "https://stake.com/poker/tournaments"
 res = requests.get(url)
 
-if "High Roller" in res.text:
+if True:
     enviar_mensaje("🚨 Hay un High Roller en Stake!")
