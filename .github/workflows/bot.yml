@@ -20,6 +20,9 @@ jobs:
 
       - name: Instalar dependencias
         run: pip install -r requirements.txt
-
+        
+      - name: Instalar navegadores
+       run: playwright install
+       
       - name: Ejecutar bot
         run: python bot.py
