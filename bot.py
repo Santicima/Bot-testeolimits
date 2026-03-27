@@ -5,15 +5,21 @@ CHAT_ID = "1572595670"
 
 def enviar_mensaje(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    r = requests.post(url, data={
+    requests.post(url, data={
         "chat_id": CHAT_ID,
         "text": msg
     })
-    print("RESPUESTA TELEGRAM:")
-    print(r.text)
 
-print("INICIANDO BOT...")
+url = "https://stake.com/sports"
+res = requests.get(url)
 
-enviar_mensaje("🔥 TEST BOT 🔥")
+print("Chequeando deportes...")
 
-print("BOT TERMINADO")
+texto = res.text.lower()
+
+if "football" in texto or "soccer" in texto or "tennis" in texto:
+    enviar_mensaje("✅ HAY EVENTOS DEPORTIVOS (bot funcionando)")
+    print("FUNCIONA")
+else:
+    enviar_mensaje("❌ No detectó deportes")
+    print("NO HAY")
