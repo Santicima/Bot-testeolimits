@@ -5,13 +5,15 @@ CHAT_ID = "535031481"
 
 def enviar_mensaje(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    requests.post(url, data={
+    r = requests.post(url, data={
         "chat_id": CHAT_ID,
         "text": msg
     })
+    print("RESPUESTA TELEGRAM:")
+    print(r.text)
 
-url = "https://stake.com/poker/tournaments"
-res = requests.get(url)
+print("INICIANDO BOT...")
 
-if True:
-    enviar_mensaje("🚨 Hay un High Roller en Stake!")
+enviar_mensaje("🔥 TEST BOT 🔥")
+
+print("BOT TERMINADO")
