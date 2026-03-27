@@ -7,7 +7,7 @@ TOKEN = "8313535097:AAGzDtX7FoWjVEDCLuX2uilhRfLSWNFLY2g"
 CHAT_ID = "-5183949382"
 API_KEY = "67acd669ed652da798ba482d69c33a95"
 
-
+print("bot iniciado")
 ARCHIVO = "cuotas.json"
 def enviar_mensaje(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
@@ -77,11 +77,15 @@ for partido, cuota in cuotas_actuales.items():
 def enviar_heartbeat():
     ahora = datetime.utcnow()
 
-    # manda solo una vez por hora (primeros 5 minutos)
-    if ahora.minute < 5:
+    # guardamos último envío en memoria del mensaje
+    minuto_actual = ahora.hour * 60 + ahora.minute
+
+    # solo enviar si estamos cerca de múltiplos de 60
+    if minuto_actual % 60 < 5:
         enviar_mensaje("🤖 Bot activo, esperando alertas...")
 # guardar
 with open(ARCHIVO, "w") as f:
     json.dump(cuotas_actuales, f)
 
 enviar_heartbeat()
+print("bot terminado")
