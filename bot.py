@@ -7,6 +7,6 @@ url = f"https://api.the-odds-api.com/v4/sports/soccer_argentina_primera_division
 res = requests.get(url)
 
 print("STATUS:", res.status_code)
-print("RESPUESTA:", res.text)
-
+print("PARTIDOS:", len(res.json()))
+print(res.json())
 
