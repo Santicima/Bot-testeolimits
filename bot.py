@@ -10,7 +10,7 @@ CHAT_ID = "-5183949382"
 API_KEY = "67acd669ed652da798ba482d69c33a95"
 
 ARCHIVO = "cuotas.json"
-ULTIMO_HEARTBEAT = None
+ULTIMO_HEARTBEAT = heartbest.json
 
 
 def enviar_mensaje(msg):
@@ -21,21 +21,30 @@ def enviar_mensaje(msg):
     })
 
 
-def enviar_heartbeat():
-    global ULTIMO_HEARTBEAT
 
+
+def enviar_heartbeat():
     ahora = datetime.now(timezone.utc)
 
-    if ULTIMO_HEARTBEAT is None:
-        enviar_mensaje("🤖 Bot activo, esperando alertas...")
-        ULTIMO_HEARTBEAT = ahora
-        return
+    ultima = None
 
-    diferencia = (ahora - ULTIMO_HEARTBEAT).total_seconds()
+    if os.path.exists(ARCHIVO_HEART):
+        with open(ARCHIVO_HEART, "r") as f:
+            data = json.load(f)
+            ultima = datetime.fromisoformat(data["ultima"])
 
-    if diferencia >= 3600:
+    if ultima is None:
         enviar_mensaje("🤖 Bot activo, esperando alertas...")
-        ULTIMO_HEARTBEAT = ahora
+    else:
+        diferencia = (ahora - ultima).total_seconds()
+
+        if diferencia < 3600:
+            return
+
+        enviar_mensaje("🤖 Bot activo, esperando alertas...")
+
+    with open(ARCHIVO_HEART, "w") as f:
+        json.dump({"ultima": ahora.isoformat()}, f)
 
 
 # 🔁 LOOP INFINITO (CLAVE)
