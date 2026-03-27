@@ -63,3 +63,5 @@ try:
 except Exception as e:
     enviar_mensaje("⚠️ Error en el bot")
     print(e)
+
+print(data)
