@@ -9,7 +9,7 @@ CHAT_ID = "-5183949382"
 API_KEY = "TU_API_KEY"
 
 ARCHIVO = "cuotas.json"
-
+print("VERSION NUEVA")
 ULTIMO_HEARTBEAT = None
 
 def enviar_mensaje(msg):
