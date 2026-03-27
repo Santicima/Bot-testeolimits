@@ -9,7 +9,6 @@ API_KEY = "67acd669ed652da798ba482d69c33a95"
 
 
 ARCHIVO = "cuotas.json"
-ARCHIVO_HEARTBEAT = "heartbeat.txt"
 def enviar_mensaje(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     requests.post(url, data={
