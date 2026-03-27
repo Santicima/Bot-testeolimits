@@ -4,12 +4,12 @@ import os
 from datetime import datetime, timezone
 
 TOKEN = "8313535097:AAGzDtX7FoWjVEDCLuX2uilhRfLSWNFLY2g"
-CHAT_ID = "1572595670"
+CHAT_ID = "-5183949382"
 API_KEY = "67acd669ed652da798ba482d69c33a95"
 
 
 ARCHIVO = "cuotas.json"
-
+ARCHIVO_HEARTBEAT = "heartbeat.txt"
 def enviar_mensaje(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     requests.post(url, data={
@@ -75,7 +75,21 @@ for partido, cuota in cuotas_actuales.items():
                 f"Δ {round(cambio,2)}\n"
                 f"💰 Posible dinero fuerte"
             )
+def enviar_heartbeat():
+    ahora = datetime.utcnow()
+    hora_actual = ahora.strftime("%Y-%m-%d %H")
 
+    ultima_hora = None
+    if os.path.exists(ARCHIVO_HEARTBEAT):
+        with open(ARCHIVO_HEARTBEAT, "r") as f:
+            ultima_hora = f.read()
+
+    if ultima_hora != hora_actual:
+        enviar_mensaje("🤖 Bot activo, esperando alertas...")
+        with open(ARCHIVO_HEARTBEAT, "w") as f:
+            f.write(hora_actual)
 # guardar
 with open(ARCHIVO, "w") as f:
     json.dump(cuotas_actuales, f)
+
+enviar_heartbeat()
