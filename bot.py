@@ -1,6 +1,7 @@
 import requests
 import json
 import os
+import time
 from datetime import datetime, timezone
 
 TOKEN = "8313535097:AAGzDtX7FoWjVEDCLuX2uilhRfLSWNFLY2g"
@@ -88,4 +89,13 @@ with open(ARCHIVO, "w") as f:
     json.dump(cuotas_actuales, f)
 
 enviar_heartbeat()
+while True:
+    try:
+        # TODO tu código del bot va acá arriba
+        print("Ejecución completa")
+
+    except Exception as e:
+        print("Error:", e)
+
+    time.sleep(300)  # 5 minutos
 print("bot terminado")
