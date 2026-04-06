@@ -40,7 +40,10 @@ def obtener_partidos_voley():
             if not isinstance(ev, dict):
                 continue
 
-            torneo = ev.get("tournament", {}).get("name", "")
+          categoria = ev.get("tournament", {}).get("name", "") + " " + ev.get("category", {}).get("name", "")
+
+        if "arg" not in categoria.lower():
+           continue
 
             # 🔥 FILTRO ARGENTINA
             if "Argentina" not in torneo:
