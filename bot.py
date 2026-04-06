@@ -79,7 +79,8 @@ def detectar_steam_moves(cuotas_actuales, cuotas_anteriores):
 def detectar_delay_vs_bet365(data):
     alerts = []
 
-    for partido in data:
+   if not isinstance(partido, dict):
+    continue
         equipos = f"{partido['home_team']} vs {partido['away_team']}"
 
         bet365_odds = None
@@ -127,7 +128,15 @@ while True:
 
         url = f"https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey={API_KEY}&regions=eu&markets=h2h"
         res = requests.get(url)
-        data = res.json()
+        try:
+       data = res.json()
+       except:
+       print("Error parseando JSON")
+       continue
+
+      if not isinstance(data, list):
+      print("Respuesta inesperada:", data)
+      continue
 
         cuotas_actuales = {}
         ahora = datetime.now(timezone.utc)
