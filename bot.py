@@ -1,17 +1,23 @@
-
 import requests
 import json
 import os
 import time
 from datetime import datetime, timezone
 
+# =========================
+# CONFIG
+# =========================
 TOKEN = "8313535097:AAGzDtX7FoWjVEDCLuX2uilhRfLSWNFLY2g"
 CHAT_ID = "-5183949382"
 API_KEY = "67acd669ed652da798ba482d69c33a95"
 
+
 ARCHIVO = "cuotas.json"
 ARCHIVO_HEART = "heartbeat.json"
 
+# =========================
+# TELEGRAM
+# =========================
 
 def enviar_mensaje(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
@@ -20,8 +26,9 @@ def enviar_mensaje(msg):
         "text": msg
     })
 
-
-
+# =========================
+# HEARTBEAT
+# =========================
 
 def enviar_heartbeat():
     ahora = datetime.now(timezone.utc)
@@ -46,8 +53,74 @@ def enviar_heartbeat():
     with open(ARCHIVO_HEART, "w") as f:
         json.dump({"ultima": ahora.isoformat()}, f)
 
+# =========================
+# 🔥 DETECTOR STEAM MOVES
+# =========================
 
-# 🔁 LOOP INFINITO (CLAVE)
+def detectar_steam_moves(cuotas_actuales, cuotas_anteriores):
+    for partido, cuota in cuotas_actuales.items():
+        if partido in cuotas_anteriores:
+            anterior = cuotas_anteriores[partido]
+            cambio = anterior - cuota
+
+            if cambio >= 0.25:
+                enviar_mensaje(
+                    f"🔥 STEAM MOVE DETECTADO\n\n"
+                    f"{partido}\n"
+                    f"{anterior} → {cuota}\n"
+                    f"Δ {round(cambio,2)}\n"
+                    f"💰 Posible dinero fuerte"
+                )
+
+# =========================
+# 🔥 DETECTOR BET365 DELAY
+# =========================
+
+def detectar_delay_vs_bet365(data):
+    alerts = []
+
+    for partido in data:
+        equipos = f"{partido['home_team']} vs {partido['away_team']}"
+
+        bet365_odds = None
+        otras_odds = []
+
+        for book in partido.get("bookmakers", []):
+            try:
+                nombre = book["title"].lower()
+                cuota = book["markets"][0]["outcomes"][0]["price"]
+
+                if "bet365" in nombre:
+                    bet365_odds = cuota
+                else:
+                    otras_odds.append(cuota)
+
+            except:
+                continue
+
+        if bet365_odds and len(otras_odds) > 0:
+            mejor_otra = min(otras_odds)
+
+            # si otras casas ya bajaron y bet365 no
+            if bet365_odds > mejor_otra:
+                diff = round(bet365_odds - mejor_otra, 2)
+
+                if diff >= 0.2:
+                    alerts.append(
+                        f"⚠️ POSIBLE DELAY BET365\n\n"
+                        f"{equipos}\n"
+                        f"Bet365: {bet365_odds}\n"
+                        f"Otras: {mejor_otra}\n"
+                        f"Δ {diff}\n"
+                        f"💰 Bet365 va atras"
+                    )
+
+    return alerts
+
+# =========================
+# 🔁 LOOP PRINCIPAL
+# =========================
+
 while True:
     try:
         print("ENTRANDO AL LOOP")
@@ -62,7 +135,7 @@ while True:
         for partido in data:
             inicio = datetime.fromisoformat(partido["commence_time"].replace("Z", "+00:00"))
 
-            # ❌ ignorar en vivo
+            # ignorar en vivo
             if inicio < ahora:
                 continue
 
@@ -90,20 +163,13 @@ while True:
         else:
             cuotas_anteriores = {}
 
-        # 🔥 detección
-        for partido, cuota in cuotas_actuales.items():
-            if partido in cuotas_anteriores:
-                anterior = cuotas_anteriores[partido]
-                cambio = anterior - cuota
+        # 🔥 steam moves
+        detectar_steam_moves(cuotas_actuales, cuotas_anteriores)
 
-                if cambio >= 0.25:
-                    enviar_mensaje(
-                        f"🔥 STEAM MOVE DETECTADO\n\n"
-                        f"{partido}\n"
-                        f"{anterior} → {cuota}\n"
-                        f"Δ {round(cambio,2)}\n"
-                        f"💰 Posible dinero fuerte"
-                    )
+        # 🔥 delay vs bet365
+        alerts = detectar_delay_vs_bet365(data)
+        for alerta in alerts:
+            enviar_mensaje(alerta)
 
         # guardar
         with open(ARCHIVO, "w") as f:
@@ -112,10 +178,10 @@ while True:
         # heartbeat
         enviar_heartbeat()
 
-        print("bot terminado")
+        print("BOT OK")
 
     except Exception as e:
         print("Error:", e)
 
     print("ESPERANDO 5 MINUTOS...")
-    time.sleep(300) 
+    time.sleep(300)
