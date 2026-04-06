@@ -48,10 +48,7 @@ def obtener_partidos_voley():
 
             # 🔍 DEBUG (ver en logs)
             print("TORNEO:", categoria)
-
-            # 🔥 FILTRO ARGENTINA FLEXIBLE
-            if "arg" not in categoria.lower():
-                continue
+            print("PARTIDO:", home, "vs", away, "| SCORE:", home_score, "-", away_score)
 
             home = ev.get("homeTeam", {}).get("name", "Local")
             away = ev.get("awayTeam", {}).get("name", "Visitante")
