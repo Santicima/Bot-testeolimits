@@ -23,32 +23,43 @@ def enviar_mensaje(msg):
 ultimo_estado = {}
 
 # =========================
-# SOFASCORE (SCRAPING SIMPLE)
+# SOFASCORE (MEJORADO)
 # =========================
 
 def obtener_partidos_voley():
     try:
-        url = "https://api.sofascore.com/api/v1/sport/volleyball/events/live"
+        url = "https://api.sofascore.com/api/v1/sport/volleyball/events/today"
         res = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
         data = res.json()
 
         partidos = []
 
         for ev in data.get("events", []):
+
+            # 🔥 VALIDACIONES IMPORTANTES
+            if not isinstance(ev, dict):
+                continue
+
             torneo = ev.get("tournament", {}).get("name", "")
 
             # 🔥 FILTRO ARGENTINA
             if "Argentina" not in torneo:
                 continue
 
-            home = ev["homeTeam"]["name"]
-            away = ev["awayTeam"]["name"]
+            status = ev.get("status", {}).get("type", "")
 
-            home_score = ev["homeScore"]["current"]
-            away_score = ev["awayScore"]["current"]
+            # 🔥 SOLO EN VIVO
+            if status != "inprogress":
+                continue
+
+            home = ev.get("homeTeam", {}).get("name", "Local")
+            away = ev.get("awayTeam", {}).get("name", "Visitante")
+
+            home_score = ev.get("homeScore", {}).get("current", 0)
+            away_score = ev.get("awayScore", {}).get("current", 0)
 
             partidos.append({
-                "id": ev["id"],
+                "id": ev.get("id"),
                 "match": f"{home} vs {away}",
                 "score": f"{home_score}-{away_score}"
             })
