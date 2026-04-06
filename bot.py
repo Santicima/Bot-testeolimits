@@ -5,6 +5,7 @@ from datetime import datetime
 TOKEN = "8313535097:AAGzDtX7FoWjVEDCLuX2uilhRfLSWNFLY2g"
 CHAT_ID = "-5183949382"
 
+
 # =========================
 # TELEGRAM
 # =========================
@@ -23,7 +24,7 @@ def enviar_mensaje(msg):
 ultimo_estado = {}
 
 # =========================
-# SOFASCORE (MEJORADO)
+# SOFASCORE (MEJORADO + DEBUG)
 # =========================
 
 def obtener_partidos_voley():
@@ -36,24 +37,20 @@ def obtener_partidos_voley():
 
         for ev in data.get("events", []):
 
-            # 🔥 VALIDACIONES IMPORTANTES
             if not isinstance(ev, dict):
                 continue
 
-          categoria = ev.get("tournament", {}).get("name", "") + " " + ev.get("category", {}).get("name", "")
-       # 👇 AGREGALO ACÁ
+            # 🔥 CATEGORIA COMPLETA
+            categoria = (
+                ev.get("tournament", {}).get("name", "") + " " +
+                ev.get("category", {}).get("name", "")
+            )
+
+            # 🔍 DEBUG (ver en logs)
             print("TORNEO:", categoria)
+
+            # 🔥 FILTRO ARGENTINA FLEXIBLE
             if "arg" not in categoria.lower():
-            continue
-
-            # 🔥 FILTRO ARGENTINA
-            if "Argentina" not in torneo:
-                continue
-
-            status = ev.get("status", {}).get("type", "")
-
-            # 🔥 SOLO EN VIVO
-            if status != "inprogress":
                 continue
 
             home = ev.get("homeTeam", {}).get("name", "Local")
@@ -61,6 +58,10 @@ def obtener_partidos_voley():
 
             home_score = ev.get("homeScore", {}).get("current", 0)
             away_score = ev.get("awayScore", {}).get("current", 0)
+
+            # 🔥 DETECTAR SI YA EMPEZÓ (MEJOR QUE STATUS)
+            if home_score == 0 and away_score == 0:
+                continue
 
             partidos.append({
                 "id": ev.get("id"),
