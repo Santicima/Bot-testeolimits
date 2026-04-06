@@ -1,10 +1,15 @@
 import requests
 import time
-from datetime import datetime
 
 TOKEN = "8313535097:AAGzDtX7FoWjVEDCLuX2uilhRfLSWNFLY2g"
 CHAT_ID = "-5183949382"
 
+HEADERS = {
+    "User-Agent": "Mozilla/5.0",
+    "Accept": "application/json"
+}
+
+ultimo_estado = {}
 
 # =========================
 # TELEGRAM
@@ -18,46 +23,37 @@ def enviar_mensaje(msg):
     })
 
 # =========================
-# ESTADO
+# SCRAPING REAL (SOFASCORE)
 # =========================
 
-ultimo_estado = {}
-
-# =========================
-# SOFASCORE (MEJORADO + DEBUG)
-# =========================
-
-def obtener_partidos_voley():
+def obtener_voley_real():
     try:
-        url = "https://api.sofascore.com/api/v1/sport/volleyball/events/today"
-        res = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
+        url = "https://api.sofascore.com/api/v1/sport/volleyball/events/live"
+        res = requests.get(url, headers=HEADERS)
+
+        print("STATUS:", res.status_code)
+
         data = res.json()
 
         partidos = []
 
         for ev in data.get("events", []):
 
-            if not isinstance(ev, dict):
-                continue
+            home = ev.get("homeTeam", {}).get("name", "")
+            away = ev.get("awayTeam", {}).get("name", "")
 
-            # 🔥 CATEGORIA COMPLETA
+            home_score = ev.get("homeScore", {}).get("current", 0)
+            away_score = ev.get("awayScore", {}).get("current", 0)
+
             categoria = (
                 ev.get("tournament", {}).get("name", "") + " " +
                 ev.get("category", {}).get("name", "")
             )
 
-            # 🔍 DEBUG (ver en logs)
-            print("TORNEO:", categoria)
-            print("PARTIDO:", home, "vs", away, "| SCORE:", home_score, "-", away_score)
+            print("PARTIDO:", home, "vs", away, "|", categoria)
 
-            home = ev.get("homeTeam", {}).get("name", "Local")
-            away = ev.get("awayTeam", {}).get("name", "Visitante")
-
-            home_score = ev.get("homeScore", {}).get("current", 0)
-            away_score = ev.get("awayScore", {}).get("current", 0)
-
-            # 🔥 DETECTAR SI YA EMPEZÓ (MEJOR QUE STATUS)
-            if home_score == 0 and away_score == 0:
+            # 🔥 FILTRO SUAVE
+            if "arg" not in categoria.lower():
                 continue
 
             partidos.append({
@@ -69,11 +65,11 @@ def obtener_partidos_voley():
         return partidos
 
     except Exception as e:
-        print("Error SofaScore:", e)
+        print("Error scraping:", e)
         return []
 
 # =========================
-# DETECTOR DE CAMBIOS
+# DETECTOR
 # =========================
 
 def detectar_cambios(partidos):
@@ -89,7 +85,7 @@ def detectar_cambios(partidos):
 
         if ultimo_estado[match_id] != score:
             msg = (
-                f"🏐 CAMBIO EN VIVO\n\n"
+                f"🏐 PUNTO EN VIVO\n\n"
                 f"{p['match']}\n"
                 f"{ultimo_estado[match_id]} → {score}"
             )
@@ -98,21 +94,21 @@ def detectar_cambios(partidos):
             ultimo_estado[match_id] = score
 
 # =========================
-# LOOP PRINCIPAL
+# LOOP
 # =========================
 
 while True:
     try:
-        print("BUSCANDO PARTIDOS...")
+        print("BUSCANDO VOLEY REAL...")
 
-        partidos = obtener_partidos_voley()
+        partidos = obtener_voley_real()
 
         if len(partidos) == 0:
-            print("No hay voley argentino en vivo")
+            print("No se detectaron partidos")
 
         detectar_cambios(partidos)
 
     except Exception as e:
         print("Error:", e)
 
-    time.sleep(5)
+    time.sleep(3)
