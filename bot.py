@@ -79,8 +79,20 @@ def detectar_steam_moves(cuotas_actuales, cuotas_anteriores):
 def detectar_delay_vs_bet365(data):
     alerts = []
 
-   if not isinstance(partido, dict):
-    continue
+    # 🔥 VALIDAR QUE DATA SEA LISTA
+    if not isinstance(data, list):
+        print("Data inválida en delay:", data)
+        return alerts
+
+    for partido in data:
+
+        # 🔥 VALIDAR CADA PARTIDO
+        if not isinstance(partido, dict):
+            continue
+
+        if "home_team" not in partido or "away_team" not in partido:
+            continue
+
         equipos = f"{partido['home_team']} vs {partido['away_team']}"
 
         bet365_odds = None
@@ -102,7 +114,6 @@ def detectar_delay_vs_bet365(data):
         if bet365_odds and len(otras_odds) > 0:
             mejor_otra = min(otras_odds)
 
-            # si otras casas ya bajaron y bet365 no
             if bet365_odds > mejor_otra:
                 diff = round(bet365_odds - mejor_otra, 2)
 
@@ -128,20 +139,31 @@ while True:
 
         url = f"https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey={API_KEY}&regions=eu&markets=h2h"
         res = requests.get(url)
-        try:
-       data = res.json()
-       except:
-       print("Error parseando JSON")
-       continue
 
-      if not isinstance(data, list):
-      print("Respuesta inesperada:", data)
-      continue
+        # 🔥 PARSEO SEGURO
+        try:
+            data = res.json()
+        except:
+            print("Error parseando JSON")
+            time.sleep(300)
+            continue
+
+        if not isinstance(data, list):
+            print("Respuesta inesperada:", data)
+            time.sleep(300)
+            continue
 
         cuotas_actuales = {}
         ahora = datetime.now(timezone.utc)
 
         for partido in data:
+
+            if not isinstance(partido, dict):
+                continue
+
+            if "commence_time" not in partido:
+                continue
+
             inicio = datetime.fromisoformat(partido["commence_time"].replace("Z", "+00:00"))
 
             # ignorar en vivo
