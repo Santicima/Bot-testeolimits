@@ -58,7 +58,8 @@ def obtener_apuestas():
         print("URL actual:", driver.current_url)
         try:
             WebDriverWait(driver, 15).until(
-                EC.presence_of_element_located(...)
+                            EC.presence_of_element_located((By.XPATH, "//*[contains(@class,'row') or contains(@class,'bet')]"))
+
             )
         except:
             print("Timeout esperando filas")
