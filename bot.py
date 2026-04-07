@@ -9,8 +9,8 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-TOKEN = os.getenv(“TOKEN”)
-CHAT_ID = os.getenv(“CHAT_ID”)
+TOKEN = os.getenv("TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 URL = "https://stake1017.com/?c=playstakeio"
 
 def enviar_mensaje(msg):
