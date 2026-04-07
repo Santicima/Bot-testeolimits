@@ -82,4 +82,23 @@ while True:
 
             monto = float(bet.get("amount", 0))
             odds = bet.get("odds", "")
-            evento = bet.get("fixture", {}).get("name", "​​​​​​​​​​​​​​​​
+            evento = bet.get("fixture", {}).get("name", "Desconocido")
+
+            categoria, emoji = clasificar_monto(monto)
+            if categoria is None:
+                continue
+
+            msg = (
+                emoji + " " + categoria + " BET DETECTED\n\n"
+                + "Evento: " + evento + "\n"
+                + "Monto: $" + str(round(monto, 2)) + "\n"
+                + "Cuota: " + str(odds)
+            )
+            enviar_mensaje(msg)
+            print("Enviado:", categoria, evento, monto)
+
+        time.sleep(15)
+
+    except Exception as e:
+        print("ERROR GENERAL:", e)
+        time.sleep(10)
