@@ -1,15 +1,17 @@
-import requests
 import time
+import requests
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+
+# =========================
+# CONFIG
+# =========================
 
 TOKEN = "8313535097:AAGzDtX7FoWjVEDCLuX2uilhRfLSWNFLY2g"
 CHAT_ID = "-5183949382"
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0",
-    "Accept": "application/json"
-}
-
-ultimo_estado = {}
+URL = "https://stake1017.com/?c=playstakeio"
 
 # =========================
 # TELEGRAM
@@ -23,92 +25,143 @@ def enviar_mensaje(msg):
     })
 
 # =========================
-# SCRAPING REAL (SOFASCORE)
+# SELENIUM SETUP
 # =========================
 
-def obtener_voley_real():
+options = Options()
+options.add_argument("--headless")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+
+driver = webdriver.Chrome(options=options)
+
+# =========================
+# ESTADO
+# =========================
+
+vistos = set()
+
+# =========================
+# HELPERS
+# =========================
+
+def parsear_monto(texto):
     try:
-        url = "https://api.sofascore.com/api/v1/sport/volleyball/events/live"
-        res = requests.get(url, headers=HEADERS)
+        texto = texto.replace("$", "").replace(",", "").strip()
+        return float(texto)
+    except:
+        return 0
 
-        print("STATUS:", res.status_code)
 
-        data = res.json()
+def clasificar_monto(monto):
+    if monto >= 100000:
+        return "HUGE", "🟣"
+    elif monto >= 50000:
+        return "BIG", "🔴"
+    elif monto >= 10000:
+        return "MEDIUM", "🟠"
+    elif monto >= 3000:
+        return "SMALL", "🟡"
+    else:
+        return None, None
 
-        partidos = []
 
-        for ev in data.get("events", []):
+def abrir_stake():
+    try:
+        driver.get(URL)
+        time.sleep(5)
 
-            home = ev.get("homeTeam", {}).get("name", "")
-            away = ev.get("awayTeam", {}).get("name", "")
+        # retry si el mirror tarda o falla
+        if "stake" not in driver.current_url:
+            print("Reintentando carga...")
+            driver.get(URL)
+            time.sleep(5)
 
-            home_score = ev.get("homeScore", {}).get("current", 0)
-            away_score = ev.get("awayScore", {}).get("current", 0)
-
-            categoria = (
-                ev.get("tournament", {}).get("name", "") + " " +
-                ev.get("category", {}).get("name", "")
-            )
-
-            print("PARTIDO:", home, "vs", away, "|", categoria)
-
-            # 🔥 FILTRO SUAVE
-            if "arg" not in categoria.lower():
-                continue
-
-            partidos.append({
-                "id": ev.get("id"),
-                "match": f"{home} vs {away}",
-                "score": f"{home_score}-{away_score}"
-            })
-
-        return partidos
+        print("URL actual:", driver.current_url)
 
     except Exception as e:
-        print("Error scraping:", e)
-        return []
+        print("Error abriendo stake:", e)
+
 
 # =========================
-# DETECTOR
+# SCRAPING
 # =========================
 
-def detectar_cambios(partidos):
-    global ultimo_estado
+def obtener_apuestas():
+    abrir_stake()
 
-    for p in partidos:
-        match_id = p["id"]
-        score = p["score"]
+    apuestas = []
 
-        if match_id not in ultimo_estado:
-            ultimo_estado[match_id] = score
+    filas = driver.find_elements(By.CSS_SELECTOR, "div[class*='row']")
+
+    print("Filas encontradas:", len(filas))  # DEBUG
+
+    for fila in filas:
+        try:
+            texto = fila.text.strip()
+
+            if not texto:
+                continue
+
+            columnas = texto.split("\n")
+
+            if len(columnas) < 3:
+                continue
+
+            evento = columnas[0]
+            cuota = columnas[-2]
+            monto_texto = columnas[-1]
+
+            monto = parsear_monto(monto_texto)
+
+            apuestas.append({
+                "evento": evento,
+                "cuota": cuota,
+                "monto": monto,
+                "raw": texto
+            })
+
+        except Exception as e:
+            print("Error parseando fila:", e)
             continue
 
-        if ultimo_estado[match_id] != score:
-            msg = (
-                f"🏐 PUNTO EN VIVO\n\n"
-                f"{p['match']}\n"
-                f"{ultimo_estado[match_id]} → {score}"
-            )
+    return apuestas
 
-            enviar_mensaje(msg)
-            ultimo_estado[match_id] = score
 
 # =========================
-# LOOP
+# LOOP PRINCIPAL
 # =========================
+
+print("🚀 Bot iniciado...")
 
 while True:
     try:
-        print("BUSCANDO VOLEY REAL...")
+        apuestas = obtener_apuestas()
 
-        partidos = obtener_voley_real()
+        for a in apuestas:
+            key = a["raw"]
 
-        if len(partidos) == 0:
-            print("No se detectaron partidos")
+            if key in vistos:
+                continue
 
-        detectar_cambios(partidos)
+            vistos.add(key)
+
+            categoria, emoji = clasificar_monto(a["monto"])
+
+            if categoria is None:
+                continue
+
+            msg = f"""{emoji} {categoria} BET DETECTED
+
+🎯 Evento: {a['evento']}
+💸 Monto: ${a['monto']}
+📊 Cuota: {a['cuota']}
+"""
+
+            enviar_mensaje(msg)
+
+        time.sleep(15)
 
     except Exception as e:
-        print("Error:", e)
-
-    time.sleep(3)
+        print("ERROR GENERAL:", e)
+        time.sleep(10)
