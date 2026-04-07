@@ -5,5 +5,5 @@ services:
     buildCommand: |
       pip install -r requirements.txt
       apt-get update
-      apt-get install -y chromium-browser chromium-chromedriver
+      apt-get install -y chromium chromium-driver
     startCommand: python bot.py
