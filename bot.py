@@ -13,13 +13,13 @@ TOKEN = os.getenv("TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 URL = "https://stake1017.com/?c=playstakeio"
 
-def enviar_mensaje(msg):
+def parsear_monto(texto):
     try:
-        url = "https://api.telegram.org/bot" + TOKEN + "/sendMessage"
-        requests.post(url, data={"chat_id": CHAT_ID, "text": msg})
-    except Exception as e:
-        print("Error Telegram:", e)
-
+        texto = texto.replace("$", "").replace(",", "").strip()
+        texto = "".join(c for c in texto if c.isdigit() or c == ".")
+        return float(texto) if texto else 0
+    except:
+        return 0
 
 options = Options()
 options.add_argument("--headless=new")
