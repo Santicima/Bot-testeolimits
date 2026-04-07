@@ -1,4 +1,4 @@
-print("🔥 SCRIPT ARRANCÓ")
+print("🔥 SCRIPT ARRANC1Ó")
 
 import time
 
