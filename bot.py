@@ -20,7 +20,7 @@ URL = "https://stake1017.com/?c=playstakeio"
 # =========================
 # TELEGRAM
 # =========================
-
+print("SCRIPT ARRANCÓ")
 def enviar_mensaje(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     requests.post(url, data={
@@ -39,7 +39,7 @@ options.add_argument("--disable-dev-shm-usage")
 options.add_argument("--disable-gpu")
 
 options.binary_location = "/usr/bin/chromium"
-
+print("🚀 Iniciando bot...")
 driver = webdriver.Chrome(
     service=Service("/usr/bin/chromedriver"),
     options=options
@@ -82,8 +82,12 @@ def clasificar_monto(monto):
 
 def abrir_stake():
     try:
+          print("🌐 Abriendo Stake...")
         driver.get(URL)
+        print("✅ Página cargada")
         time.sleep(7)
+
+        print("URL actual:", driver.current_url)
 
         print("URL actual:", driver.current_url)
 
@@ -113,7 +117,7 @@ def obtener_apuestas():
     abrir_stake()
 
     apuestas = []
-
+    print("🔍 Buscando apuestas...")
     filas = driver.find_elements(
         By.XPATH,
         "//div[contains(@class,'table')]//div[contains(@class,'row')]"
