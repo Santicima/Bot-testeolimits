@@ -23,18 +23,24 @@ HEADERS = {
 }
 
 QUERY = """
-query HighRollerBets {
-  sportsBetList(limit: 10) {
+query {
+  sportsHighRollerBetList(limit: 10) {
     id
     amount
     currency
     odds
+    iid
     fixture {
+      name
+      slug
+    }
+    user {
       name
     }
   }
 }
 """
+
 
 def enviar_mensaje(msg):
     try:
