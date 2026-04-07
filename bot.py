@@ -11,7 +11,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 TOKEN = os.getenv(“TOKEN”)
 CHAT_ID = os.getenv(“CHAT_ID”)
-URL = “https://stake1017.com/?c=playstakeio”
+URL = "https://stake1017.com/?c=playstakeio"
 
 def enviar_mensaje(msg):
 try:
