@@ -13,6 +13,13 @@ TOKEN = os.getenv("TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 URL = "https://stake1017.com/?c=playstakeio"
 
+def enviar_mensaje(msg):
+    try:
+        url = "https://api.telegram.org/bot" + TOKEN + "/sendMessage"
+        requests.post(url, data={"chat_id": CHAT_ID, "text": msg})
+    except Exception as e:
+        print("Error Telegram:", e)
+
 def parsear_monto(texto):
     try:
         texto = texto.replace("$", "").replace(",", "").strip()
@@ -20,6 +27,18 @@ def parsear_monto(texto):
         return float(texto) if texto else 0
     except:
         return 0
+
+def clasificar_monto(monto):
+    if monto >= 100000:
+        return "HUGE", "🟣"
+    elif monto >= 50000:
+        return "BIG", "🔴"
+    elif monto >= 10000:
+        return "MEDIUM", "🟠"
+    elif monto >= 3000:
+        return "SMALL", "🟡"
+    else:
+        return None, None
 
 options = Options()
 options.add_argument("--headless=new")
@@ -36,21 +55,7 @@ driver = webdriver.Chrome(
     options=options
 )
 
-
 vistos = set()
-
-def clasificar_monto(monto):
-    if monto >= 100000:
-        return "HUGE", "🟣"
-    elif monto >= 50000:
-        return "BIG", "🔴"
-    elif monto >= 10000:
-        return "MEDIUM", "🟠"
-    elif monto >= 3000:
-        return "SMALL", "🟡"
-    else:
-        return None, None
-
 
 def obtener_apuestas():
     try:
@@ -58,8 +63,7 @@ def obtener_apuestas():
         print("URL actual:", driver.current_url)
         try:
             WebDriverWait(driver, 15).until(
-                            EC.presence_of_element_located((By.XPATH, "//*[contains(@class,'row') or contains(@class,'bet')]"))
-
+                EC.presence_of_element_located((By.XPATH, "//*[contains(@class,'row') or contains(@class,'bet')]"))
             )
         except:
             print("Timeout esperando filas")
@@ -70,9 +74,7 @@ def obtener_apuestas():
         print("Error cargando pagina:", e)
         return []
 
-
     apuestas = []
-
     estrategias = [
         "//div[contains(@class,'table')]//div[contains(@class,'row')]",
         "//div[contains(@class,'bets')]//div[contains(@class,'item')]",
@@ -85,56 +87,47 @@ def obtener_apuestas():
 
     filas = []
     for xpath in estrategias:
-    filas = driver.find_elements(By.XPATH, xpath)
-    if filas:
-        print("XPath funciono:", xpath, "filas:", len(filas))
-        break
+        filas = driver.find_elements(By.XPATH, xpath)
+        if filas:
+            print("XPath funciono:", xpath, "filas:", len(filas))
+            break
 
     print("Filas encontradas:", len(filas))
 
     for fila in filas:
-    try:
-        texto = fila.text.strip()
-        if not texto:
+        try:
+            texto = fila.text.strip()
+            if not texto:
+                continue
+            columnas = texto.split("\n")
+            print("Columnas:", columnas)
+            if len(columnas) < 2:
+                continue
+            evento = columnas[0]
+            monto_texto = ""
+            cuota = ""
+            for col in reversed(columnas):
+                if "$" in col and not monto_texto:
+                    monto_texto = col
+                elif monto_texto and not cuota:
+                    cuota = col
+                    break
+            if not monto_texto:
+                monto_texto = columnas[-1]
+            monto = parsear_monto(monto_texto)
+            apuestas.append({
+                "evento": evento,
+                "cuota": cuota,
+                "monto": monto,
+                "raw": texto
+            })
+        except Exception as e:
+            print("Error parseando fila:", e)
             continue
-
-        columnas = texto.split("\n")
-        print("Columnas:", columnas)
-
-        if len(columnas) < 2:
-            continue
-
-        evento = columnas[0]
-        monto_texto = ""
-        cuota = ""
-
-        for col in reversed(columnas):
-            if "$" in col and not monto_texto:
-                monto_texto = col
-            elif monto_texto and not cuota:
-                cuota = col
-                break
-
-        if not monto_texto:
-            monto_texto = columnas[-1]
-
-        monto = parsear_monto(monto_texto)
-
-        apuestas.append({
-            "evento": evento,
-            "cuota": cuota,
-            "monto": monto,
-            "raw": texto
-        })
-
-    except Exception as e:
-        print("Error parseando fila:", e)
-        continue
 
     return apuestas
 
-
-print("Bot iniciado…")
+print("Bot iniciado...")
 
 while True:
     try:
@@ -144,26 +137,18 @@ while True:
             if key in vistos:
                 continue
             vistos.add(key)
-
-
-        categoria, emoji = clasificar_monto(a["monto"])
-        if categoria is None:
-            continue
-
-        msg = (
-            emoji + " " + categoria + " BET DETECTED\n\n"
-            + "Evento: " + a["evento"] + "\n"
-            + "Monto: $" + str(round(a["monto"], 2)) + "\n"
-            + "Cuota: " + a["cuota"]
-        )
-
-        enviar_mensaje(msg)
-        print("Enviado:", categoria, a["evento"], a["monto"])
-
-
+            categoria, emoji = clasificar_monto(a["monto"])
+            if categoria is None:
+                continue
+            msg = (
+                emoji + " " + categoria + " BET DETECTED\n\n"
+                + "Evento: " + a["evento"] + "\n"
+                + "Monto: $" + str(round(a["monto"], 2)) + "\n"
+                + "Cuota: " + a["cuota"]
+            )
+            enviar_mensaje(msg)
+            print("Enviado:", categoria, a["evento"], a["monto"])
         time.sleep(15)
     except Exception as e:
         print("ERROR GENERAL:", e)
         time.sleep(10)
-
-    
