@@ -9,40 +9,16 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# =========================
-
-# CONFIG
-
-# =========================
-TOKEN = os.getenv("8313535097:AAGzDtX7FoWjVEDCLuX2uilhRfLSWNFLY2g")
-CHAT_ID = os.getenv("-5183949382")
-
-
-# URL directo a High Rollers de deportes
-
-URL = “https://stake1017.com/sports/high-rollers?c=playstakeio”
-
-# =========================
-
-# TELEGRAM
-
-# =========================
+TOKEN = os.getenv(“TOKEN”)
+CHAT_ID = os.getenv(“CHAT_ID”)
+URL = “https://stake1017.com/?c=playstakeio”
 
 def enviar_mensaje(msg):
-url = f”https://api.telegram.org/bot{TOKEN}/sendMessage”
 try:
-requests.post(url, data={
-“chat_id”: CHAT_ID,
-“text”: msg
-})
+url = “https://api.telegram.org/bot” + TOKEN + “/sendMessage”
+requests.post(url, data={“chat_id”: CHAT_ID, “text”: msg})
 except Exception as e:
-print(“Error enviando mensaje Telegram:”, e)
-
-# =========================
-
-# SELENIUM SETUP
-
-# =========================
+print(“Error Telegram:”, e)
 
 options = Options()
 options.add_argument(”–headless=new”)
@@ -59,24 +35,12 @@ service=Service(”/usr/bin/chromedriver”),
 options=options
 )
 
-# =========================
-
-# ESTADO
-
-# =========================
-
 vistos = set()
-
-# =========================
-
-# HELPERS
-
-# =========================
 
 def parsear_monto(texto):
 try:
 texto = texto.replace(”$”, “”).replace(”,”, “”).strip()
-texto = ‘’.join(c for c in texto if c.isdigit() or c == ‘.’)
+texto = “”.join(c for c in texto if c.isdigit() or c == “.”)
 return float(texto) if texto else 0
 except:
 return 0
@@ -93,39 +57,30 @@ return “SMALL”, “🟡”
 else:
 return None, None
 
-# =========================
-
-# SCRAPING
-
-# =========================
-
 def obtener_apuestas():
 try:
 driver.get(URL)
 print(“URL actual:”, driver.current_url)
 
 ```
-    # Esperar a que cargue alguna fila
     try:
         WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.XPATH, "//*[contains(@class,'row') or contains(@class,'bet') or contains(@class,'wager')]"))
+            EC.presence_of_element_located((By.XPATH, "//*[contains(@class,'row') or contains(@class,'bet')]"))
         )
     except:
         print("Timeout esperando filas")
 
     time.sleep(5)
 
-    # Imprimir HTML para debug (primeros 3000 chars)
     html = driver.page_source
     print("HTML snippet:", html[:3000])
 
 except Exception as e:
-    print("Error cargando página:", e)
+    print("Error cargando pagina:", e)
     return []
 
 apuestas = []
 
-# Intentar múltiples estrategias de XPath
 estrategias = [
     "//div[contains(@class,'table')]//div[contains(@class,'row')]",
     "//div[contains(@class,'bets')]//div[contains(@class,'item')]",
@@ -140,7 +95,7 @@ filas = []
 for xpath in estrategias:
     filas = driver.find_elements(By.XPATH, xpath)
     if filas:
-        print(f"XPath funcionó: {xpath} — {len(filas)} filas")
+        print("XPath funciono:", xpath, "filas:", len(filas))
         break
 
 print("Filas encontradas:", len(filas))
@@ -158,10 +113,9 @@ for fila in filas:
             continue
 
         evento = columnas[0]
-
-        # Buscar el monto: la columna que contenga "$"
         monto_texto = ""
         cuota = ""
+
         for col in reversed(columnas):
             if "$" in col and not monto_texto:
                 monto_texto = col
@@ -188,13 +142,7 @@ for fila in filas:
 return apuestas
 ```
 
-# =========================
-
-# LOOP PRINCIPAL
-
-# =========================
-
-print(“🚀 Bot iniciado…”)
+print(“Bot iniciado…”)
 
 while True:
 try:
@@ -203,28 +151,23 @@ apuestas = obtener_apuestas()
 ```
     for a in apuestas:
         key = a["raw"]
-
         if key in vistos:
             continue
-
         vistos.add(key)
 
         categoria, emoji = clasificar_monto(a["monto"])
-
         if categoria is None:
             continue
 
-        msg = f"""{emoji} {categoria} BET DETECTED
-```
+        msg = (
+            emoji + " " + categoria + " BET DETECTED\n\n"
+            + "Evento: " + a["evento"] + "\n"
+            + "Monto: $" + str(round(a["monto"], 2)) + "\n"
+            + "Cuota: " + a["cuota"]
+        )
 
-🎯 Evento: {a[‘evento’]}
-💸 Monto: ${a[‘monto’]:,.2f}
-📊 Cuota: {a[‘cuota’]}
-“””
-
-```
         enviar_mensaje(msg)
-        print(f"✅ Enviado: {categoria} - {a['evento']} - ${a['monto']}")
+        print("Enviado:", categoria, a["evento"], a["monto"])
 
     time.sleep(15)
 
@@ -232,3 +175,4 @@ except Exception as e:
     print("ERROR GENERAL:", e)
     time.sleep(10)
 ```
+
