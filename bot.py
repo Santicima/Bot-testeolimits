@@ -167,4 +167,3 @@ while True:
 except Exception as e:
     print("ERROR GENERAL:", e)
     time.sleep(10)
-```
