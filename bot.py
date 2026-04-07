@@ -83,16 +83,16 @@ def obtener_apuestas():
         "//*[contains(@class,'wager')]",
     ]
 
-filas = []
-for xpath in estrategias:
+    filas = []
+    for xpath in estrategias:
     filas = driver.find_elements(By.XPATH, xpath)
     if filas:
         print("XPath funciono:", xpath, "filas:", len(filas))
         break
 
-print("Filas encontradas:", len(filas))
+    print("Filas encontradas:", len(filas))
 
-for fila in filas:
+    for fila in filas:
     try:
         texto = fila.text.strip()
         if not texto:
