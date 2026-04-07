@@ -55,10 +55,8 @@ def clasificar_monto(monto):
 def obtener_apuestas():
     try:
         driver.get(URL)
+       print("URL actual:", driver.current_url)
 
-print("URL actual:", driver.current_url)
-
-```
     try:
         WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.XPATH, "//*[contains(@class,'row') or contains(@class,'bet')]"))
