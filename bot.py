@@ -132,7 +132,7 @@ for fila in filas:
         continue
 
 return apuestas
-```
+
 
 print("Bot iniciado…")
 
@@ -141,7 +141,7 @@ while True:
         apuestas = obtener_apuestas()
 
 
-```
+
     for a in apuestas:
         key = a["raw"]
         if key in vistos:
