@@ -49,7 +49,7 @@ def clasificar_monto(monto):
 if monto >= 100000:
 return "HUGE", "🟣"
 elif monto >= 50000:
-return "BIG, "🔴"
+return "BIG", "🔴"
 elif monto >= 10000:
 return "MEDIUM", "🟠"
 elif monto >= 3000:
