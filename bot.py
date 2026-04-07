@@ -39,28 +39,28 @@ vistos = set()
 
 def parsear_monto(texto):
 try:
-texto = texto.replace(”$”, “”).replace(”,”, “”).strip()
-texto = “”.join(c for c in texto if c.isdigit() or c == “.”)
+texto = texto.replace("$", "").replace(",", "").strip()
+texto = "".join(c for c in texto if c.isdigit() or c == ".")
 return float(texto) if texto else 0
 except:
 return 0
 
 def clasificar_monto(monto):
 if monto >= 100000:
-return “HUGE”, “🟣”
+return "HUGE", "🟣"
 elif monto >= 50000:
-return “BIG”, “🔴”
+return "BIG, “🔴”
 elif monto >= 10000:
-return “MEDIUM”, “🟠”
+return "MEDIUM", "🟠"
 elif monto >= 3000:
-return “SMALL”, “🟡”
+return "SMALL", "🟡"
 else:
 return None, None
 
 def obtener_apuestas():
 try:
 driver.get(URL)
-print(“URL actual:”, driver.current_url)
+print("URL actual:", driver.current_url)
 
 ```
     try:
