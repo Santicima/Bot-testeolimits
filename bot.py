@@ -55,23 +55,20 @@ def clasificar_monto(monto):
 def obtener_apuestas():
     try:
         driver.get(URL)
-       print("URL actual:", driver.current_url)
+        print("URL actual:", driver.current_url)
+        try:
+            WebDriverWait(driver, 15).until(
+                EC.presence_of_element_located(...)
+            )
+        except:
+            print("Timeout esperando filas")
+        time.sleep(5)
+        html = driver.page_source
+        print("HTML snippet:", html[:3000])
+    except Exception as e:
+        print("Error cargando pagina:", e)
+        return []
 
-    try:
-        WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.XPATH, "//*[contains(@class,'row') or contains(@class,'bet')]"))
-        )
-    except:
-        print("Timeout esperando filas")
-
-    time.sleep(5)
-
-    html = driver.page_source
-    print("HTML snippet:", html[:3000])
-
-except Exception as e:
-    print("Error cargando pagina:", e)
-    return []
 
 apuestas = []
 
