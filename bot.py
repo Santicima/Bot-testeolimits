@@ -38,11 +38,12 @@ options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 options.add_argument("--disable-gpu")
 
+options.binary_location = "/usr/bin/chromium"
+
 driver = webdriver.Chrome(
-    service=Service(ChromeDriverManager().install()),
+    service=Service("/usr/bin/chromedriver"),
     options=options
 )
-
 # =========================
 # ESTADO
 # =========================
