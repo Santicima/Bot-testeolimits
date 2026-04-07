@@ -14,11 +14,12 @@ CHAT_ID = os.getenv("CHAT_ID")
 URL = "https://stake1017.com/?c=playstakeio"
 
 def enviar_mensaje(msg):
-try:
-url = "https://api.telegram.org/bot" + TOKEN + "/sendMessage"
-requests.post(url, data={"chat_id": CHAT_ID, "text": msg})
-except Exception as e:
-print("Error Telegram:", e)
+    try:
+        url = "https://api.telegram.org/bot" + TOKEN + "/sendMessage"
+        requests.post(url, data={"chat_id": CHAT_ID, "text": msg})
+    except Exception as e:
+        print("Error Telegram:", e)
+
 
 options = Options()
 options.add_argument("--headless=new")
