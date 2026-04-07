@@ -1,15 +1,19 @@
 import time
 import requests
+import os
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 
 # =========================
 # CONFIG
 # =========================
 
-TOKEN = "8313535097:AAGzDtX7FoWjVEDCLuX2uilhRfLSWNFLY2g"
-CHAT_ID = "-5183949382"
+TOKEN = os.getenv("8313535097:AAGzDtX7FoWjVEDCLuX2uilhRfLSWNFLY2g")
+CHAT_ID = os.getenv("-5183949382")
 
 URL = "https://stake1017.com/?c=playstakeio"
 
@@ -29,12 +33,10 @@ def enviar_mensaje(msg):
 # =========================
 
 options = Options()
-options.add_argument("--headless")
+options.add_argument("--headless=new")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
-
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
+options.add_argument("--disable-gpu")
 
 driver = webdriver.Chrome(
     service=Service(ChromeDriverManager().install()),
@@ -53,8 +55,9 @@ vistos = set()
 
 def parsear_monto(texto):
     try:
-        texto = texto.replace("$", "").replace(",", "").strip()
-        return float(texto)
+        texto = texto.replace("$", "").replace(",", "")
+        texto = ''.join(c for c in texto if c.isdigit() or c == '.')
+        return float(texto) if texto else 0
     except:
         return 0
 
@@ -72,18 +75,30 @@ def clasificar_monto(monto):
         return None, None
 
 
+# =========================
+# NAVEGACIÓN
+# =========================
+
 def abrir_stake():
     try:
         driver.get(URL)
-        time.sleep(5)
-
-        # retry si el mirror tarda o falla
-        if "stake" not in driver.current_url:
-            print("Reintentando carga...")
-            driver.get(URL)
-            time.sleep(5)
+        time.sleep(7)
 
         print("URL actual:", driver.current_url)
+
+        # 👉 ir a Sports
+        try:
+            driver.find_element(By.XPATH, "//a[contains(@href, '/sports')]").click()
+            time.sleep(5)
+        except:
+            print("No encontró botón Sports")
+
+        # 👉 ir a High Rollers
+        try:
+            driver.find_element(By.XPATH, "//*[contains(text(),'High Roller')]").click()
+            time.sleep(5)
+        except:
+            print("No encontró High Roller")
 
     except Exception as e:
         print("Error abriendo stake:", e)
@@ -98,9 +113,12 @@ def obtener_apuestas():
 
     apuestas = []
 
-    filas = driver.find_elements(By.CSS_SELECTOR, "div[class*='row']")
+    filas = driver.find_elements(
+        By.XPATH,
+        "//div[contains(@class,'table')]//div[contains(@class,'row')]"
+    )
 
-    print("Filas encontradas:", len(filas))  # DEBUG
+    print("Filas encontradas:", len(filas))
 
     for fila in filas:
         try:
