@@ -82,12 +82,10 @@ def clasificar_monto(monto):
 
 def abrir_stake():
     try:
-          print("🌐 Abriendo Stake...")
+        print("🌐 Abriendo Stake...")
         driver.get(URL)
         print("✅ Página cargada")
         time.sleep(7)
-
-        print("URL actual:", driver.current_url)
 
         print("URL actual:", driver.current_url)
 
@@ -107,7 +105,6 @@ def abrir_stake():
 
     except Exception as e:
         print("Error abriendo stake:", e)
-
 
 # =========================
 # SCRAPING
