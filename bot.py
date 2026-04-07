@@ -32,35 +32,40 @@ options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) App
 options.binary_location = "/usr/bin/chromium"
 
 driver = webdriver.Chrome(
-service=Service("/usr/bin/chromedriver"),
-options=options
+    service=Service("/usr/bin/chromedriver"),
+    options=options
 )
+
 
 vistos = set()
 
 def parsear_monto(texto):
-try:
-texto = texto.replace("$", "").replace(",", "").strip()
-texto = "".join(c for c in texto if c.isdigit() or c == ".")
-return float(texto) if texto else 0
-except:
+    try:
+        texto = texto.replace...
+        texto = "".join...
+        return float...
+    except:
+        return 0
+
 return 0
 
 def clasificar_monto(monto):
-if monto >= 100000:
-return "HUGE", "🟣"
-elif monto >= 50000:
-return "BIG", "🔴"
-elif monto >= 10000:
-return "MEDIUM", "🟠"
-elif monto >= 3000:
-return "SMALL", "🟡"
-else:
-return None, None
+    if monto >= 100000:
+        return "HUGE", "🟣"
+    elif monto >= 50000:
+        return "BIG", "🔴"
+    elif monto >= 10000:
+        return "MEDIUM", "🟠"
+    elif monto >= 3000:
+        return "SMALL", "🟡"
+    else:
+        return None, None
+
 
 def obtener_apuestas():
-try:
-driver.get(URL)
+    try:
+        driver.get(URL)
+
 print("URL actual:", driver.current_url)
 
 ```
@@ -146,8 +151,9 @@ return apuestas
 print("Bot iniciado…")
 
 while True:
-try:
-apuestas = obtener_apuestas()
+    try:
+        apuestas = obtener_apuestas()
+
 
 ```
     for a in apuestas:
