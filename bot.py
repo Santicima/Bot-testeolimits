@@ -5,6 +5,15 @@ import os
 TOKEN = os.getenv("TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 STAKE_TOKEN = os.getenv("STAKE_TOKEN")
+PROXY_USER = os.getenv("PROXY_USER")
+PROXY_PASS = os.getenv("PROXY_PASS")
+PROXY_HOST = os.getenv("PROXY_HOST")
+PROXY_PORT = os.getenv("PROXY_PORT")
+
+PROXIES = {
+    "http": "http://" + PROXY_USER + ":" + PROXY_PASS + "@" + PROXY_HOST + ":" + PROXY_PORT,
+    "https": "http://" + PROXY_USER + ":" + PROXY_PASS + "@" + PROXY_HOST + ":" + PROXY_PORT,
+}
 
 HEADERS = {
     "Content-Type": "application/json",
@@ -56,7 +65,8 @@ while True:
             "https://stake.com/_api/graphql",
             json={"query": QUERY},
             headers=HEADERS,
-            timeout=15
+            proxies=PROXIES,
+            timeout=20
         )
         print("Status:", response.status_code)
         print("Respuesta:", response.text[:500])
@@ -72,23 +82,4 @@ while True:
 
             monto = float(bet.get("amount", 0))
             odds = bet.get("odds", "")
-            evento = bet.get("fixture", {}).get("name", "Desconocido")
-
-            categoria, emoji = clasificar_monto(monto)
-            if categoria is None:
-                continue
-
-            msg = (
-                emoji + " " + categoria + " BET DETECTED\n\n"
-                + "Evento: " + evento + "\n"
-                + "Monto: $" + str(round(monto, 2)) + "\n"
-                + "Cuota: " + str(odds)
-            )
-            enviar_mensaje(msg)
-            print("Enviado:", categoria, evento, monto)
-
-        time.sleep(15)
-
-    except Exception as e:
-        print("ERROR GENERAL:", e)
-        time.sleep(10)
+            evento = bet.get("fixture", {}).get("name", "​​​​​​​​​​​​​​​​
