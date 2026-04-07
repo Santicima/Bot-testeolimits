@@ -142,7 +142,7 @@ for fila in filas:
 return apuestas
 ```
 
-print(“Bot iniciado…”)
+print("Bot iniciado…")
 
 while True:
 try:
