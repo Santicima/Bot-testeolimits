@@ -131,7 +131,7 @@ for fila in filas:
         print("Error parseando fila:", e)
         continue
 
-return apuestas
+    return apuestas
 
 
 print("Bot iniciado…")
