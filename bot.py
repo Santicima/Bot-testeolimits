@@ -160,8 +160,7 @@ while True:
         enviar_mensaje(msg)
         print("Enviado:", categoria, a["evento"], a["monto"])
 
-    time.sleep(15)
-
-except Exception as e:
-    print("ERROR GENERAL:", e)
-    time.sleep(10)
+        time.sleep(15)
+            except Exception as e:
+                print("ERROR GENERAL:", e)
+                    time.sleep(10)
