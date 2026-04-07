@@ -1,6 +1,7 @@
 import time
 import requests
 import os
+import shutil
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -37,11 +38,13 @@ options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 options.add_argument("--disable-gpu")
 
-# 🔥 CLAVE para Render
-options.binary_location = "/usr/bin/chromium-browser"
+# 👉 encontrar automáticamente el driver
+driver_path = shutil.which("chromedriver") or shutil.which("chromium-driver")
+
+print("Driver encontrado en:", driver_path)
 
 driver = webdriver.Chrome(
-    service=Service("/usr/bin/chromedriver"),
+    service=Service(driver_path),
     options=options
 )
 
@@ -186,11 +189,6 @@ while True:
 
             enviar_mensaje(msg)
 
-        time.sleep(15)
-
-    except Exception as e:
-        print("ERROR GENERAL:", e)
-        time.sleep(10)
         time.sleep(15)
 
     except Exception as e:
