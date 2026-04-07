@@ -21,7 +21,8 @@ CHAT_ID = os.getenv("-5183949382")
 
 # URL directo a High Rollers de deportes
 
-URL = “https://stake1017.com/sports/high-rollers?c=playstakeio”
+URL = "https://stake1017.com/?c=playstakeio"
+
 
 # =========================
 
