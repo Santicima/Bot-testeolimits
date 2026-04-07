@@ -139,14 +139,12 @@ print("Bot iniciado…")
 while True:
     try:
         apuestas = obtener_apuestas()
+        for a in apuestas:
+            key = a["raw"]
+            if key in vistos:
+                continue
+            vistos.add(key)
 
-
-
-    for a in apuestas:
-        key = a["raw"]
-        if key in vistos:
-            continue
-        vistos.add(key)
 
         categoria, emoji = clasificar_monto(a["monto"])
         if categoria is None:
