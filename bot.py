@@ -15,7 +15,7 @@ URL = "https://stake1017.com/?c=playstakeio"
 
 def enviar_mensaje(msg):
 try:
-url = “https://api.telegram.org/bot” + TOKEN + “/sendMessage”
+url = "https://api.telegram.org/bot" + TOKEN + “/sendMessage”
 requests.post(url, data={“chat_id”: CHAT_ID, “text”: msg})
 except Exception as e:
 print(“Error Telegram:”, e)
