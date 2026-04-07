@@ -38,22 +38,20 @@ options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 options.add_argument("--disable-gpu")
 
-
-print("Driver encontrado en:", driver_path)
+# 🔥 buscar driver
 driver_path = shutil.which("chromedriver") or shutil.which("chromium-driver")
 
 print("Driver encontrado en:", driver_path)
 
+# 🚨 validación
 if driver_path is None:
     raise Exception("❌ NO se encontró chromedriver en el sistema")
 
-
-
+# 🚀 crear driver
 driver = webdriver.Chrome(
     service=Service(driver_path),
     options=options
 )
-
 # =========================
 # ESTADO
 # =========================
