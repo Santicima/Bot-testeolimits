@@ -71,17 +71,17 @@ def obtener_apuestas():
         return []
 
 
-apuestas = []
+    apuestas = []
 
-estrategias = [
-    "//div[contains(@class,'table')]//div[contains(@class,'row')]",
-    "//div[contains(@class,'bets')]//div[contains(@class,'item')]",
-    "//div[contains(@class,'high-roller')]//div[contains(@class,'row')]",
-    "//tbody/tr",
-    "//div[@data-testid='bet-row']",
-    "//*[contains(@class,'bet-row')]",
-    "//*[contains(@class,'wager')]",
-]
+    estrategias = [
+        "//div[contains(@class,'table')]//div[contains(@class,'row')]",
+        "//div[contains(@class,'bets')]//div[contains(@class,'item')]",
+        "//div[contains(@class,'high-roller')]//div[contains(@class,'row')]",
+        "//tbody/tr",
+        "//div[@data-testid='bet-row']",
+        "//*[contains(@class,'bet-row')]",
+        "//*[contains(@class,'wager')]",
+    ]
 
 filas = []
 for xpath in estrategias:
