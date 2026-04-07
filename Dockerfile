@@ -1,6 +1,5 @@
 FROM python:3.11-slim
 
-# instalar chrome
 RUN apt-get update && apt-get install -y \
     wget \
     unzip \
@@ -9,7 +8,6 @@ RUN apt-get update && apt-get install -y \
     chromium-driver \
     && rm -rf /var/lib/apt/lists/*
 
-# setear variables
 ENV CHROME_BIN=/usr/bin/chromium
 ENV CHROMEDRIVER=/usr/bin/chromedriver
 
@@ -19,4 +17,4 @@ COPY . .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python", "bot.py"]
+CMD ["python", "-u", "bot.py"]
