@@ -4,11 +4,13 @@ import os
 
 TOKEN = os.getenv("TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
-STAKE_TOKEN = os.getenv("4949e23dfc3974ae6de51fa29f6e4d1304aadd9cc15cc7f8dc4e485cd2cdbbd1ddf9cfcb8affea722d6a89d47c098e7f")
+STAKE_TOKEN = os.getenv("STAKE_TOKEN")
 
 HEADERS = {
     "Content-Type": "application/json",
-    "x-access-token": STAKE_TOKEN
+    "x-access-token": STAKE_TOKEN,
+    "Referer": "https://stake.com/",
+    "Origin": "https://stake.com"
 }
 
 QUERY = """
@@ -51,15 +53,15 @@ print("Bot iniciado...")
 while True:
     try:
         response = requests.post(
-            "https://api.stake.com/graphql",
+            "https://stake.com/_api/graphql",
             json={"query": QUERY},
             headers=HEADERS,
             timeout=15
         )
         print("Status:", response.status_code)
-        data = response.json()
-        print("Respuesta:", str(data)[:500])
+        print("Respuesta:", response.text[:500])
 
+        data = response.json()
         bets = data.get("data", {}).get("sportsBetList", [])
 
         for bet in bets:
