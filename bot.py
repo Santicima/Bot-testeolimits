@@ -1,12 +1,12 @@
 import time
 import requests
 import os
-import shutil
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 
 # =========================
 # CONFIG
@@ -38,20 +38,11 @@ options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 options.add_argument("--disable-gpu")
 
-# 🔥 buscar driver
-driver_path = shutil.which("chromedriver") or shutil.which("chromium-driver")
-
-print("Driver encontrado en:", driver_path)
-
-# 🚨 validación
-if driver_path is None:
-    raise Exception("❌ NO se encontró chromedriver en el sistema")
-
-# 🚀 crear driver
 driver = webdriver.Chrome(
-    service=Service(driver_path),
+    service=Service(ChromeDriverManager().install()),
     options=options
 )
+
 # =========================
 # ESTADO
 # =========================
