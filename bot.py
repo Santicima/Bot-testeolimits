@@ -1,14 +1,13 @@
 import time
 import requests
-import os
 
-TOKEN = os.getenv("TOKEN")
-CHAT_ID = os.getenv("CHAT_ID")
-STAKE_TOKEN = os.getenv("STAKE_TOKEN")
-PROXY_USER = os.getenv("PROXY_USER")
-PROXY_PASS = os.getenv("PROXY_PASS")
-PROXY_HOST = os.getenv("PROXY_HOST")
-PROXY_PORT = os.getenv("PROXY_PORT")
+TOKEN = "8313535097:AAGzDtX7FoWjVEDCLuX2uilhRfLSWNFLY2g"
+CHAT_ID = "-5183949382"
+STAKE_TOKEN = "4949e23dfc3974ae6de51fa29f6e4d1304aadd9cc15cc7f8dc4e485cd2cdbbd1ddf9cfcb8affea722d6a89d47c098e7f"
+PROXY_USER = "oxlrjqkx"
+PROXY_PASS = "5sujwxt5sfyv"
+PROXY_HOST = "31.59.20.176"
+PROXY_PORT = "6754"
 
 PROXIES = {
     "http": "http://" + PROXY_USER + ":" + PROXY_PASS + "@" + PROXY_HOST + ":" + PROXY_PORT,
@@ -40,7 +39,6 @@ query {
   }
 }
 """
-
 
 def enviar_mensaje(msg):
     try:
@@ -78,7 +76,7 @@ while True:
         print("Respuesta:", response.text[:500])
 
         data = response.json()
-        bets = data.get("data", {}).get("sportsBetList", [])
+        bets = data.get("data", {}).get("sportsHighRollerBetList", [])
 
         for bet in bets:
             bet_id = bet.get("id", "")
@@ -89,6 +87,7 @@ while True:
             monto = float(bet.get("amount", 0))
             odds = bet.get("odds", "")
             evento = bet.get("fixture", {}).get("name", "Desconocido")
+            usuario = bet.get("user", {}).get("name", "Oculto")
 
             categoria, emoji = clasificar_monto(monto)
             if categoria is None:
@@ -97,6 +96,7 @@ while True:
             msg = (
                 emoji + " " + categoria + " BET DETECTED\n\n"
                 + "Evento: " + evento + "\n"
+                + "Usuario: " + usuario + "\n"
                 + "Monto: $" + str(round(monto, 2)) + "\n"
                 + "Cuota: " + str(odds)
             )
