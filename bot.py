@@ -4,26 +4,22 @@ import os
 
 TOKEN = os.getenv("TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
+STAKE_TOKEN = os.getenv("4949e23dfc3974ae6de51fa29f6e4d1304aadd9cc15cc7f8dc4e485cd2cdbbd1ddf9cfcb8affea722d6a89d47c098e7f")
 
 HEADERS = {
     "Content-Type": "application/json",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    "x-access-token": STAKE_TOKEN
 }
 
 QUERY = """
-{
-  betList(
-    limit: 10
-    offset: 0
-    sport: true
-  ) {
-    bet {
-      id
-      amount
-      odds
-      game {
-        name
-      }
+query HighRollerBets {
+  sportsBetList(limit: 10) {
+    id
+    amount
+    currency
+    odds
+    fixture {
+      name
     }
   }
 }
@@ -55,18 +51,18 @@ print("Bot iniciado...")
 while True:
     try:
         response = requests.post(
-            "https://stake.com/_api/graphql",
+            "https://api.stake.com/graphql",
             json={"query": QUERY},
             headers=HEADERS,
             timeout=15
         )
+        print("Status:", response.status_code)
         data = response.json()
-        print("Respuesta API:", data)
+        print("Respuesta:", str(data)[:500])
 
-        bets = data.get("data", {}).get("betList", [])
+        bets = data.get("data", {}).get("sportsBetList", [])
 
-        for item in bets:
-            bet = item.get("bet", {})
+        for bet in bets:
             bet_id = bet.get("id", "")
             if bet_id in vistos:
                 continue
@@ -74,7 +70,7 @@ while True:
 
             monto = float(bet.get("amount", 0))
             odds = bet.get("odds", "")
-            evento = bet.get("game", {}).get("name", "Desconocido")
+            evento = bet.get("fixture", {}).get("name", "Desconocido")
 
             categoria, emoji = clasificar_monto(monto)
             if categoria is None:
