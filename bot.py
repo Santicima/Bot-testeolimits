@@ -39,16 +39,6 @@ driver = webdriver.Chrome(
 
 vistos = set()
 
-def parsear_monto(texto):
-    try:
-        texto = texto.replace...
-        texto = "".join...
-        return float...
-    except:
-        return 0
-
-return 0
-
 def clasificar_monto(monto):
     if monto >= 100000:
         return "HUGE", "🟣"
